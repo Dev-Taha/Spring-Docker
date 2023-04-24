@@ -1,0 +1,73 @@
+student = {
+    "firstName": "Retha",
+    "lastName": "Killeen",
+    "email": "rkilleen@@amigoscode.com",
+    "gender": "FEMALE",
+    "address": {
+      "country": "Philippines",
+      "postCode": "PL90",
+      "city": "Manila"
+    },
+    "createdAt": "",
+    "favouriteSubjects": [
+      "maths",
+      "english",
+      "it"
+  ],
+    "totalSpentInBooks": 0.00
+}
+
+//        Address address = new Address(
+//                "Palestine",
+//                "P1085",
+//                "hifa"
+//        );
+//
+//        Student student = new Student(
+//                "taha",
+//                "shurafa",
+//                "tshurafa@gmail.com",
+//                Gender.MALE,
+//                address,
+//                List.of("Software Development Engineer","English","DevOps Engineer"),
+//                BigDecimal.TEN,
+//                LocalDateTime.now()
+//        );
+
+@Bean
+	CommandLineRunner runner(StudentRepository repository,
+							 MongoTemplate mongoTemplate){
+			return args -> {
+				Address address = new Address(
+						"Palestine",
+						"P1085",
+						"hifa"
+				);
+				String email = "tshurafa@gmail.com";
+				Student student = new Student(
+						"taha",
+						"shurafa",
+						email,
+						Gender.MALE,
+						List.of("Software Development Engineer","English","DevOps Engineer"),
+						BigDecimal.TEN,
+						LocalDateTime.now()
+				);
+				Query query = new Query();
+				query.addCriteria(Criteria.where("email").is(email));
+
+				List<Student> students=mongoTemplate.find(query,Student.class);
+				// TODO : this condition says if we have email more than 1 email give exception
+				// TODO : because we do not have any duplicate email .
+				if (students.size() > 1){
+					throw new IllegalStateException(
+							"Found many students with email "+email);
+				}
+				if(students.isEmpty()){
+					System.out.println("Inserting student "+student);
+					repository.insert(student);
+				}else {
+					System.out.println(student+"already exist");
+				}
+			};
+	}
